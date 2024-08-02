@@ -50,8 +50,11 @@ func main() {
 		respondWithError(w, http.StatusInternalServerError, "Internal Server Error")
 	})
 
-	mux.HandleFunc("GET /v1/users", apiCfg.handlerUserGetByAPIKey)
+	mux.HandleFunc("GET /v1/users", apiCfg.middlewareAuth(apiCfg.handlerUserGetByAPIKey))
 	mux.HandleFunc("POST /v1/users", apiCfg.handlerUserCreate)
+
+	mux.HandleFunc("GET /v1/feeds", apiCfg.handlerGetFeeds)
+	mux.HandleFunc("POST /v1/feeds", apiCfg.middlewareAuth(apiCfg.handlerFeedCreate))
 
 	log.Printf("Starting server on port %s", port)
 	log.Fatal(srv.ListenAndServe())

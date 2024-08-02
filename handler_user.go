@@ -6,24 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davidelng/rssfeedaggregator/internal/auth"
 	"github.com/davidelng/rssfeedaggregator/internal/database"
 	"github.com/google/uuid"
 )
 
-func (apiCfg *apiConfig) handlerUserGetByAPIKey(w http.ResponseWriter, r *http.Request) {
-	apiKey, err := auth.GetAPIKey(r.Header)
-	if err != nil {
-		respondWithError(w, http.StatusUnauthorized, "Coudln't find api key")
-		return
-	}
-
-	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
-	if err != nil {
-		respondWithError(w, http.StatusNotFound, "No user found")
-		return
-	}
-
+func (apiCfg *apiConfig) handlerUserGetByAPIKey(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
 }
 

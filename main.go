@@ -53,8 +53,12 @@ func main() {
 	mux.HandleFunc("GET /v1/users", apiCfg.middlewareAuth(apiCfg.handlerUserGetByAPIKey))
 	mux.HandleFunc("POST /v1/users", apiCfg.handlerUserCreate)
 
-	mux.HandleFunc("GET /v1/feeds", apiCfg.handlerGetFeeds)
+	mux.HandleFunc("GET /v1/feeds", apiCfg.handlerFeedsGetAll)
 	mux.HandleFunc("POST /v1/feeds", apiCfg.middlewareAuth(apiCfg.handlerFeedCreate))
+
+	mux.HandleFunc("GET /v1/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerFeedFollowGetByUser))
+	mux.HandleFunc("POST /v1/feed_follows", apiCfg.middlewareAuth(apiCfg.handlerFeedFollowCreate))
+	mux.HandleFunc("DELETE /v1/feed_follows/{feedFollowId}", apiCfg.middlewareAuth(apiCfg.handlerFeedFollowDelete))
 
 	log.Printf("Starting server on port %s", port)
 	log.Fatal(srv.ListenAndServe())

@@ -6,9 +6,26 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/davidelng/rssfeedaggregator/internal/auth"
 	"github.com/davidelng/rssfeedaggregator/internal/database"
 	"github.com/google/uuid"
 )
+
+func (apiCfg *apiConfig) handlerUserGetByAPIKey(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Coudln't find api key")
+		return
+	}
+
+	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "No user found")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, databaseUserToUser(user))
+}
 
 func (apiCfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
@@ -34,7 +51,6 @@ func (apiCfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Reques
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 	})
-
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Couldn't create user: %v", err))
 		return

@@ -2,12 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"github.com/davidelng/rssfeedaggregator/internal/database"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/davidelng/rssfeedaggregator/internal/database"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
@@ -49,6 +50,7 @@ func main() {
 		respondWithError(w, http.StatusInternalServerError, "Internal Server Error")
 	})
 
+	mux.HandleFunc("GET /v1/users", apiCfg.handlerUserGetByAPIKey)
 	mux.HandleFunc("POST /v1/users", apiCfg.handlerUserCreate)
 
 	log.Printf("Starting server on port %s", port)

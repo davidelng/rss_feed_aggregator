@@ -1,17 +1,22 @@
 # RSS Feed Aggregator
 
-## Used
+You should build a RSS feed aggregator based on your needs, and you should still use RSS to consume content, btw.
 
-- [Go](https://go.dev/)
-- [SQLC](https://sqlc.dev/)
-- [Goose](http://pressly.github.io/goose/)
-- [PostgreSQL](https://www.postgresql.org/golan)
+Also, I wanted an opportunity to use [SQLC](https://sqlc.dev/) and [Goose](http://pressly.github.io/goose/).
 
-## Description
+Why PostgreSQL? Elephants are cute, that's why I programmed in PHP for years.
 
-A restful API platform that scrapes RSS feeds and collects their posts periodically. It also handles user creation and authentication.
+Lastly, I love building CLI tools, and I love using Go for that.
 
-## Endpoints
+## 📖 Description
+
+A restful API platform that scrapes RSS feeds and collects their posts periodically for you to consume. It also handles user creation and authentication for a multi-user scenario.
+
+## 💥 Quick Start
+
+Clone the repo, provide a PORT and a CONN string for a PostgreSQL in a .env file, then run `go build -o out && ./out`, you should be able to reach the endpoints listed below.
+
+## 💻 Usage
 
 All the authenticated endpoint needs a `Authentication: ApiKey XXX` in the headers, the key is given at user creation.
 
@@ -36,7 +41,11 @@ All the authenticated endpoint needs a `Authentication: ApiKey XXX` in the heade
 - `POST /v1/feed_follows` (auth required) follow a feed
 - `DELETE /v1/feed_follows` (auth required) remove follow to a feed
 
-# Ideas for extending the project
+## 🤝 Contributing
+
+Feel free to clone the repo and submit pull requests, below are some ideas.
+
+### Ideas for extending the project
 
 - Support pagination of the endpoints that can return many items
 - Support different options for sorting and filtering posts using query parameters

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/davidelng/rssfeedaggregator/internal/database"
 	"github.com/joho/godotenv"
@@ -30,14 +31,18 @@ func main() {
 		log.Fatal("Missing connection string")
 	}
 
-	db, err := sql.Open("postgres", dbURL)
+	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		log.Fatal("Could not connect to database: %s", err)
+		log.Fatalf("Could not connect to database: %s", err)
 	}
 
+	db := database.New(conn)
 	apiCfg := apiConfig{
-		DB: database.New(db),
+		DB: db,
 	}
+
+	feedsToBeFetched := 10
+	go startScraping(db, feedsToBeFetched, time.Minute)
 
 	mux := http.NewServeMux()
 	srv := &http.Server{

@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/davidelng/rssfeedaggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 func startScraping(db *database.Queries, concurrency int, timeBetweenRequest time.Duration) {
@@ -31,7 +34,7 @@ func startScraping(db *database.Queries, concurrency int, timeBetweenRequest tim
 func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 	defer wg.Done()
 
-	err := db.MarkFeedAsFetched(context.Background(), feed.ID)
+	feed, err := db.MarkFeedAsFetched(context.Background(), feed.ID)
 	if err != nil {
 		log.Println("Error marking feed as fetched:", err)
 		return
@@ -44,7 +47,32 @@ func scrapeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 	}
 
 	for _, item := range rssFeed.Channel.Items {
-		log.Println(item.Title)
+		description := sql.NullString{}
+		if item.Description != "" {
+			description.String = item.Description
+			description.Valid = true
+		}
+		t, err := time.Parse(time.RFC1123Z, item.PubDate)
+		if err != nil {
+			log.Printf("Couldn't parse date: %v", err)
+			continue
+		}
+		_, err = db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: description,
+			PublishedAt: t,
+			FeedID:      feed.ID,
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key") {
+				continue
+			}
+			log.Printf("Couldn't create post: %v", err)
+		}
 	}
 	log.Printf("Feed %q collected, %v posts found", feed.Name, len(rssFeed.Channel.Items))
 }
